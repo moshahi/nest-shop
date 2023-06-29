@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int              @id @default(autoincrement())
+  email          String
+  phoneNumber    String
+  password       String
+  coin           Int              @default(0)
+  role           String           @default("user")
+  createdAt      DateTime         @default(now())
+  Product_detail Product_detail[]
+  Size           Size[]
+  Product        Product[]
+  Order_detial   Order_detial[]
+}
+
+//--------------------------------------------------------------------------------
+model Product_detail {
+  id          Int       @id @default(autoincrement())
+  productName String
+  productDesc String?
+  price       Int
+  coin        Int
+  userId      Int
+  creator     User      @relation(fields: [userId], references: [id])
+  Product     Product[]
+  Media       Media[]
+}
+
+model Size {
+  id       Int       @id @default(autoincrement())
+  sizeName String
+  userId   Int
+  creator  User      @relation(fields: [userId], references: [id])
+  Product  Product[]
+}
+
+model Product {
+  id              Int            @id @default(autoincrement())
+  productDetailId Int
+  productDetail   Product_detail @relation(fields: [productDetailId], references: [id])
+  sizeId          Int
+  size            Size           @relation(fields: [sizeId], references: [id])
+  userId          Int
+  creator         User           @relation(fields: [userId], references: [id])
+  stock           Int
+  BuyBag          BuyBag[]
+  Order_item      Order_item[]
+}
+
+model Media {
+  id              Int            @id @default(autoincrement())
+  path            String
+  mediaName       String
+  productDetailId Int
+  productDerail   Product_detail @relation(fields: [productDetailId], references: [id])
+}
+
+//--------------------------------------------------------------------------------
+model BuyBag {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  count     Int
+}
+
+//--------------------------------------------------------------------------------
+model Order_detial {
+  id         Int     @id @default(autoincrement())
+  buyerId    Int
+  buyer      User    @relation(fields: [buyerId], references: [id])
+  delivery   Boolean @default(false)
+  totalPrice Int
+  Order      Order[]
+}
+
+model Order_item {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  count     Int
+  Order     Order[]
+}
+
+model Order {
+  id            Int          @id @default(autoincrement())
+  orderDetailId Int
+  orderDerail   Order_detial @relation(fields: [orderDetailId], references: [id])
+  orderItemId   Int
+  orderItem     Order_item   @relation(fields: [orderItemId], references: [id])
+}
